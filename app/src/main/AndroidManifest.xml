@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
     <uses-feature android:name="android.hardware.camera.any" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -24,6 +25,7 @@
         <activity android:name=".TaskListActivity" />
         <activity android:name=".EditTaskActivity" />
         <activity android:name=".CameraActivity" android:theme="@style/Theme.AppCompat.NoActionBar"/>
+
     </application>
 
 </manifest>

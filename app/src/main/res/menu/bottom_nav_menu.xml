@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+
     <item
         android:id="@+id/nav_todo"
         android:icon="@drawable/ic_list"
@@ -10,10 +11,10 @@
         android:title="日程" />
 
     <item
-        android:id="@+id/nav_camera"
-        android:icon="@drawable/ic_camera"
-        android:title="拍照" />
-
+        android:id="@+id/nav_placeholder"
+        android:enabled="false"
+        android:icon="@drawable/bg_scan_box"
+        android:title="" />
     <item
         android:id="@+id/nav_records"
         android:icon="@drawable/ic_history"
@@ -23,4 +24,5 @@
         android:id="@+id/nav_about"
         android:icon="@drawable/ic_info"
         android:title="关于" />
+
 </menu>

@@ -15,7 +15,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class CalendarFragment : Fragment() {
-
+    // 2. 修改刷新逻辑，使用 Flow (需新增一个 Job 变量来管理，防止多次订阅冲突)
+    private var searchJob: kotlinx.coroutines.Job? = null // 在类顶部定义
     private lateinit var rvCalendar: RecyclerView
     private lateinit var calendarAdapter: CalendarAdapter
 
@@ -55,6 +56,11 @@ class CalendarFragment : Fragment() {
         taskAdapter = TaskAdapter(mutableListOf())
         rvTasks.adapter = taskAdapter
 
+
+        // ✅ 新增：允许在日历页删除
+        taskAdapter.onDeleteClick = { task ->
+            deleteTask(task)
+        }
         // 2. 初始化上面的日历列表
         rvCalendar.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         calendarAdapter = CalendarAdapter(emptyList()) { clickedDate ->
@@ -138,19 +144,55 @@ class CalendarFragment : Fragment() {
         updateCalendarUI()
     }
 
+//    private fun refreshTaskList(date: Date) {
+//        // --- 核心修改点 ---
+//        // 把 Date 转成 String，必须使用标准格式 "yyyy-MM-dd" 才能匹配数据库
+//        val sdfDb = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+//        val dateStr = sdfDb.format(date)
+//        // ------------------
+//
+//        // 取消上一次的观察，避免重复订阅
+//        searchJob?.cancel()
+//
+//
+//        viewLifecycleOwner.lifecycleScope.launch {
+//            context?.let { ctx ->
+//                val db = AppDatabase.getDatabase(ctx)
+//                // 此时 dateStr 是 "2025-12-22"，与数据库内容完美匹配
+////                val tasks = db.taskDao().getTasksByDate(dateStr)
+////                taskAdapter.updateData(tasks)
+//                db.taskDao().getTasksByDateFlow(dateStr).collect { tasks ->
+//                    taskAdapter.updateData(tasks)
+//
+//            }
+//        }
+//    }
+
     private fun refreshTaskList(date: Date) {
-        // --- 核心修改点 ---
-        // 把 Date 转成 String，必须使用标准格式 "yyyy-MM-dd" 才能匹配数据库
         val sdfDb = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         val dateStr = sdfDb.format(date)
-        // ------------------
 
-        viewLifecycleOwner.lifecycleScope.launch {
+        // 取消上一次的观察，避免重复订阅
+        searchJob?.cancel()
+
+        searchJob = viewLifecycleOwner.lifecycleScope.launch {
             context?.let { ctx ->
                 val db = AppDatabase.getDatabase(ctx)
-                // 此时 dateStr 是 "2025-12-22"，与数据库内容完美匹配
-                val tasks = db.taskDao().getTasksByDate(dateStr)
-                taskAdapter.updateData(tasks)
+                // ✅ 使用 Flow 实时观察
+                db.taskDao().getTasksByDateFlow(dateStr).collect { tasks ->
+                    taskAdapter.updateData(tasks)
+                }
+            }
+        }
+    }
+
+
+    // 3. 新增删除方法
+    private fun deleteTask(task: Task) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            context?.let { ctx ->
+                AppDatabase.getDatabase(ctx).taskDao().delete(task)
+                android.widget.Toast.makeText(ctx, "已删除", android.widget.Toast.LENGTH_SHORT).show()
             }
         }
     }

@@ -45,23 +45,45 @@ class RecordsFragment : Fragment() {
         loadAllTasks()
     }
 
+//    private fun loadAllTasks() {
+//        // 使用 viewLifecycleOwner.lifecycleScope 避免内存泄漏
+//        viewLifecycleOwner.lifecycleScope.launch {
+//            context?.let { ctx ->
+//                val db = AppDatabase.getDatabase(ctx)
+//                val tasks = db.taskDao().getAllTasks()
+//                adapter.updateData(tasks)
+//            }
+//        }
+//    }
     private fun loadAllTasks() {
-        // 使用 viewLifecycleOwner.lifecycleScope 避免内存泄漏
         viewLifecycleOwner.lifecycleScope.launch {
             context?.let { ctx ->
                 val db = AppDatabase.getDatabase(ctx)
-                val tasks = db.taskDao().getAllTasks()
-                adapter.updateData(tasks)
+                // ✅ 核心修改：使用 getAllTasksFlow() + collect
+                // 只要数据库有变化，这里会自动收到最新的 list
+                db.taskDao().getAllTasksFlow().collect { tasks ->
+                    adapter.updateData(tasks)
+                }
             }
         }
     }
 
+//    private fun deleteTask(task: Task) {
+//        viewLifecycleOwner.lifecycleScope.launch {
+//            context?.let { ctx ->
+//                val db = AppDatabase.getDatabase(ctx)
+//                db.taskDao().delete(task)
+//                loadAllTasks() // 删完刷新
+//            }
+//        }
+//    }
     private fun deleteTask(task: Task) {
         viewLifecycleOwner.lifecycleScope.launch {
             context?.let { ctx ->
                 val db = AppDatabase.getDatabase(ctx)
                 db.taskDao().delete(task)
-                loadAllTasks() // 删完刷新
+                // ❌ 删掉了 loadAllTasks()，Flow 会自动处理刷新
+                android.widget.Toast.makeText(ctx, "已删除", android.widget.Toast.LENGTH_SHORT).show()
             }
         }
     }

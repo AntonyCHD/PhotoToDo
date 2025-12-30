@@ -4,8 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F5F5F5"
-    android:fitsSystemWindows="true">
+    android:background="#F5F5F5">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
@@ -22,51 +21,76 @@
             android:paddingTop="40dp"
             android:paddingBottom="12dp">
 
-            <LinearLayout
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
                 android:paddingStart="16dp"
-                android:paddingEnd="8dp"
-                android:paddingTop="12dp"
+                android:paddingEnd="16dp"
                 android:paddingBottom="8dp">
 
                 <TextView
                     android:id="@+id/tvCurrentMonth"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:text="2025年12月"
                     android:textColor="#333333"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
-
-                <Button
-                    android:id="@+id/btnPrevWeek"
-                    style="@style/Widget.AppCompat.Button.Borderless"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:text="&lt;"
-                    android:textSize="18sp"
-                    android:textColor="#757575"/>
-
-                <Button
-                    android:id="@+id/btnNextWeek"
-                    style="@style/Widget.AppCompat.Button.Borderless"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:text="&gt;"
-                    android:textSize="18sp"
-                    android:textColor="#757575"/>
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:layout_centerVertical="true"/>
 
                 <Button
                     android:id="@+id/btnBackToday"
                     style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="36dp"
+                    android:layout_toEndOf="@id/tvCurrentMonth"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="8dp"
                     android:text="今天"
-                    android:textColor="?attr/colorPrimary"/>
-            </LinearLayout>
+                    android:textColor="?attr/colorPrimary"
+                    android:padding="0dp"/>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnPrevWeek"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginEnd="8dp"
+                        android:text="&lt;"
+                        android:textSize="16sp"
+                        android:insetLeft="0dp"
+                        android:insetTop="0dp"
+                        android:insetRight="0dp"
+                        android:insetBottom="0dp"
+                        app:cornerRadius="20dp"
+                        app:backgroundTint="#F0F0F0"
+                        app:rippleColor="#CCCCCC"
+                        android:textColor="#333333"
+                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnNextWeek"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:text="&gt;"
+                        android:textSize="16sp"
+                        android:insetLeft="0dp"
+                        android:insetTop="0dp"
+                        android:insetRight="0dp"
+                        android:insetBottom="0dp"
+                        app:cornerRadius="20dp"
+                        app:backgroundTint="#F0F0F0"
+                        app:rippleColor="#CCCCCC"
+                        android:textColor="#333333"
+                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"/>
+                </LinearLayout>
+            </RelativeLayout>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvCalendar"
