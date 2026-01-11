@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_ai_analyze"
+        android:title="AI智能分析"
+        android:icon="@drawable/ic_ai_magic_1"
+        app:showAsAction="ifRoom" />
+</menu>

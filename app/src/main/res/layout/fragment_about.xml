@@ -5,9 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5">
-
-
+    android:background="?attr/colorBackground">
 
     <View
         android:id="@+id/viewHeaderAbout"
@@ -51,7 +49,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:text="Version 1.0.0 (Beta)"
+                android:text="Version 2.0.0 (RC)"
                 android:textColor="#CCFFFFFF"
                 android:textSize="14sp" />
 
@@ -137,7 +135,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:lineSpacingExtra="4dp"
-                        android:text="• Google ML Kit (离线 OCR)\n• Android Jetpack Room (Database)\n• CameraX (自定义相机)\n• Kotlin Coroutines &amp; MVVM"
+                        android:text="• Google ML Kit (离线 OCR)\n• Qwen/Qwen2.5-7B (AI 语义分析)\n• Retrofit + OkHttp (网络请求)\n• Android Jetpack Room (Flow)\n• CameraX (专业相机交互)\n• Kotlin Coroutines &amp; MVVM"
                         android:textSize="14sp"
                         android:textColor="#424242"/>
                 </LinearLayout>
@@ -147,7 +145,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:layout_marginBottom="32dp"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="2dp"
                 app:contentPadding="16dp">
@@ -169,11 +166,24 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="PhotoDo 是一款智能日程清单应用。通过拍照识别文本，自动提取时间、地点和事件，帮助用户快速将现实中的传单、通知转化为手机中的待办事项。"
+                        android:text="PhotoDo 是一款智能日程清单应用。v2.0 版本新增了 AI 深度分析功能，能更精准地识别“下周三”、“明天下午”等复杂时间描述，并支持多用户独立管理数据。"
                         android:textSize="14sp"
                         android:textColor="#616161"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+
+            <Button
+                android:id="@+id/btnLogout"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="40dp"
+                android:text="退出登录"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                app:backgroundTint="#D32F2F"
+                app:cornerRadius="12dp" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

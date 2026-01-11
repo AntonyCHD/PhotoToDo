@@ -13,10 +13,15 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import com.example.photodo.api.AiClient
 import com.example.photodo.api.ChatRequest
 import com.example.photodo.api.Message
+import com.google.android.material.appbar.AppBarLayout
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.chinese.ChineseTextRecognizerOptions
@@ -25,7 +30,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 import org.json.JSONObject //用于解析AI返回的JSON
-
+// ... 这里的 import 可能需要添加：
+import com.example.photodo.utils.SessionManager
 class EditTaskActivity : AppCompatActivity() {
 
     private lateinit var ivPreview: ImageView
@@ -34,19 +40,34 @@ class EditTaskActivity : AppCompatActivity() {
     private lateinit var etTime: EditText
     private lateinit var etLocation: EditText
     private lateinit var btnSave: Button
+    private lateinit var appBarLayout: AppBarLayout // [新增] 定义 AppBarLayout
 
+    // ➕ 新增：初始化 SessionManager
+    private lateinit var sessionManager: SessionManager
     // 暂存识别到的原始文本，用于发给 AI
     private var rawRecognizedText: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // [新增] 启用 Edge-to-Edge 模式
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(R.layout.activity_edit_task)
 
+        // ➕ 新增：在 onCreate 里实例化
+        sessionManager = SessionManager(this)
         // 1. 初始化 Toolbar
         val toolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbarEdit)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationOnClickListener { finish() }
+
+        // [新增] 处理 Insets，为 Toolbar 留出空间
+        appBarLayout = findViewById(R.id.appBarLayout)
+        ViewCompat.setOnApplyWindowInsetsListener(appBarLayout) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updatePadding(top = systemBars.top)
+            insets
+        }
 
         // 2. 绑定控件
         ivPreview = findViewById(R.id.ivPreview)
@@ -75,31 +96,31 @@ class EditTaskActivity : AppCompatActivity() {
         btnSave.setOnClickListener { saveData() }
     }
 
-    // --- 新增：在右上角添加 AI 魔法棒按钮 ---
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menu?.add(0, 101, 0, "AI分析")
-            ?.setIcon(android.R.drawable.ic_menu_search) // 暂时用搜索图标，你可以换成星星图标
-            ?.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+    // --- 修改后：从 XML 加载菜单 ---
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.edit_task_menu, menu)
         return true
     }
 
+    // --- 修改后：处理菜单点击事件 ---
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == 101) {
-            // 点击了 AI 分析
-            val textToAnalyze = if (rawRecognizedText.isNotEmpty()) {
-                rawRecognizedText // 优先用 OCR 识别到的
-            } else {
-                etTitle.text.toString() // 如果没有 OCR 结果，就分析用户输入的标题栏内容
-            }
+        return when (item.itemId) {
+            R.id.action_ai_analyze -> {
+                val textToAnalyze = if (rawRecognizedText.isNotEmpty()) {
+                    rawRecognizedText
+                } else {
+                    etTitle.text.toString()
+                }
 
-            if (textToAnalyze.isBlank()) {
-                Toast.makeText(this, "没有可分析的文本", Toast.LENGTH_SHORT).show()
-            } else {
-                analyzeTextWithAi(textToAnalyze)
+                if (textToAnalyze.isBlank()) {
+                    Toast.makeText(this, "没有可分析的文本", Toast.LENGTH_SHORT).show()
+                } else {
+                    analyzeTextWithAi(textToAnalyze)
+                }
+                true
             }
-            return true
+            else -> super.onOptionsItemSelected(item)
         }
-        return super.onOptionsItemSelected(item)
     }
 
     // --- 核心：调用 AI ---
@@ -231,10 +252,28 @@ class EditTaskActivity : AppCompatActivity() {
         val time = etTime.text.toString()
         val loc = etLocation.text.toString()
 
+        // 1. 获取当前用户ID
+        val currentUserId = sessionManager.getCurrentUserId()
+
+        // 2. 安全检查：如果没有登录（虽然不太可能），拦截保存
+        if (currentUserId == -1) {
+            Toast.makeText(this, "登录状态失效，请重新登录", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         lifecycleScope.launch {
             val db = AppDatabase.getDatabase(applicationContext)
-            val newTask = Task(title = title, date = date, time = time, location = loc)
-            db.taskDao().insert(newTask)
+
+            // 3. 关键修改：传入 creatorId = currentUserId
+            val newTask = Task(
+                title = title,
+                date = date,
+                time = time,
+                location = loc,
+                creatorId = currentUserId // <--- 这里修复了报错
+            )
+
+            db.taskDao().insert(newTask) // 原来的 insert 方法可能叫 insertTask，请根据你的 TaskDao 确认
             Toast.makeText(this@EditTaskActivity, "保存成功", Toast.LENGTH_SHORT).show()
             finish()
         }

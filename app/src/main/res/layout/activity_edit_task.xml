@@ -4,9 +4,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5">
+    android:background="?attr/colorBackground">
 
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <androidx.appcompat.widget.Toolbar
@@ -14,7 +15,8 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:title="识别结果核对"
-            app:titleTextColor="#FFFFFF"
+            app:titleTextColor="?attr/colorOnPrimary"
+            android:background="?attr/colorPrimary"
             app:navigationIcon="@drawable/abc_ic_ab_back_material" />
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -33,13 +35,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
                 app:cardCornerRadius="8dp"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="?attr/colorSurface">
                 <ImageView
                     android:id="@+id/ivPreview"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
-                    android:background="#EEEEEE"/>
+                    android:background="?attr/colorSurface"/>
             </androidx.cardview.widget.CardView>
 
             <TextView
@@ -59,27 +62,6 @@
                     android:layout_height="wrap_content" />
             </com.google.android.material.textfield.TextInputLayout>
 
-<!--            <com.google.android.material.textfield.TextInputLayout-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_marginTop="10dp"-->
-<!--                android:hint="日期 (YYYY年MM月DD日)">-->
-<!--                <com.google.android.material.textfield.TextInputEditText-->
-<!--                    android:id="@+id/etDate"-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content" />-->
-<!--            </com.google.android.material.textfield.TextInputLayout>-->
-
-<!--            <com.google.android.material.textfield.TextInputLayout-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_marginTop="10dp"-->
-<!--                android:hint="时间 (HH:MM)">-->
-<!--                <com.google.android.material.textfield.TextInputEditText-->
-<!--                    android:id="@+id/etTime"-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content" />-->
-<!--            </com.google.android.material.textfield.TextInputLayout>-->
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

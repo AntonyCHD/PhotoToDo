@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
+// 需要导入 SessionManager
+import com.example.photodo.utils.SessionManager
 
 class CalendarFragment : Fragment() {
     // 2. 修改刷新逻辑，使用 Flow (需新增一个 Job 变量来管理，防止多次订阅冲突)
@@ -88,6 +90,12 @@ class CalendarFragment : Fragment() {
         // 4. 首次加载
         updateCalendarUI()
     }
+
+    override fun onResume() {
+        super.onResume()
+        if (::taskAdapter.isInitialized) taskAdapter.playEntrance()
+    }
+
 
     /**
      * 核心算法：根据 currentWeekBaseDate 计算出一周7天的数据
@@ -172,14 +180,19 @@ class CalendarFragment : Fragment() {
         val sdfDb = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         val dateStr = sdfDb.format(date)
 
-        // 取消上一次的观察，避免重复订阅
         searchJob?.cancel()
 
         searchJob = viewLifecycleOwner.lifecycleScope.launch {
             context?.let { ctx ->
+                // 1. 获取当前用户 ID
+                val sessionManager = SessionManager(ctx)
+                val userId = sessionManager.getCurrentUserId()
+
                 val db = AppDatabase.getDatabase(ctx)
-                // ✅ 使用 Flow 实时观察
-                db.taskDao().getTasksByDateFlow(dateStr).collect { tasks ->
+
+                // 2. 传入 userId 进行过滤
+                // 修复点：增加 userId 参数
+                db.taskDao().getTasksByDateFlow(dateStr, userId).collect { tasks ->
                     taskAdapter.updateData(tasks)
                 }
             }

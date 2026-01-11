@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F5F5F5">
+    android:background="?attr/colorBackground">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
@@ -12,7 +12,7 @@
         android:layout_marginBottom="2dp"
         app:cardElevation="2dp"
         app:cardCornerRadius="0dp"
-        app:cardBackgroundColor="#FFFFFF">
+        app:cardBackgroundColor="?attr/colorSurface">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -26,7 +26,9 @@
                 android:layout_height="wrap_content"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
-                android:paddingBottom="8dp">
+                android:paddingBottom="8dp"
+                android:clipToPadding="false"
+                android:clipChildren="false">
 
                 <TextView
                     android:id="@+id/tvCurrentMonth"
@@ -62,8 +64,12 @@
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:layout_marginEnd="8dp"
-                        android:text="&lt;"
-                        android:textSize="16sp"
+                        app:icon="@drawable/ic_left"
+                        app:iconGravity="textStart"
+                        app:iconPadding="0dp"
+                        app:iconSize="24dp"
+                        app:iconTint="#333333"
+                        android:gravity="center"
                         android:insetLeft="0dp"
                         android:insetTop="0dp"
                         android:insetRight="0dp"
@@ -71,15 +77,18 @@
                         app:cornerRadius="20dp"
                         app:backgroundTint="#F0F0F0"
                         app:rippleColor="#CCCCCC"
-                        android:textColor="#333333"
                         style="@style/Widget.MaterialComponents.Button.UnelevatedButton"/>
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnNextWeek"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:text="&gt;"
-                        android:textSize="16sp"
+                        app:icon="@drawable/ic_right"
+                        app:iconGravity="textStart"
+                        app:iconPadding="0dp"
+                        app:iconSize="24dp"
+                        app:iconTint="#333333"
+                        android:gravity="center"
                         android:insetLeft="0dp"
                         android:insetTop="0dp"
                         android:insetRight="0dp"
@@ -87,7 +96,6 @@
                         app:cornerRadius="20dp"
                         app:backgroundTint="#F0F0F0"
                         app:rippleColor="#CCCCCC"
-                        android:textColor="#333333"
                         style="@style/Widget.MaterialComponents.Button.UnelevatedButton"/>
                 </LinearLayout>
             </RelativeLayout>

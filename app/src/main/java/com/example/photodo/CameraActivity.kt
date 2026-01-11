@@ -18,7 +18,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -34,17 +39,15 @@ class CameraActivity : AppCompatActivity() {
     private lateinit var btnClose: ImageView
 
     private var imageCapture: ImageCapture? = null
-    private var camera: Camera? = null // ✨ 新增：用于控制对焦和缩放
+    private var camera: Camera? = null
     private lateinit var cameraExecutor: ExecutorService
 
-    // 注册相册选择器
     private val selectImageLauncher = registerForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let { goToEditPage(it) }
     }
 
-    // 注册权限请求
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
@@ -58,12 +61,23 @@ class CameraActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // [新增] 启用 Edge-to-Edge 模式
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(R.layout.activity_camera)
 
         viewFinder = findViewById(R.id.viewFinder)
         btnCapture = findViewById(R.id.btnCapture)
         btnGallery = findViewById(R.id.btnGallery)
         btnClose = findViewById(R.id.btnClose)
+
+        // [新增] 为关闭按钮处理 Insets
+        ViewCompat.setOnApplyWindowInsetsListener(btnClose) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                topMargin = systemBars.top + 20 // 20dp in pixels might need adjustment
+            }
+            insets
+        }
 
         // 1. 检查权限
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
@@ -81,7 +95,7 @@ class CameraActivity : AppCompatActivity() {
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
 
-    @SuppressLint("ClickableViewAccessibility") // 忽略触摸无障碍警告
+    @SuppressLint("ClickableViewAccessibility")
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
@@ -99,12 +113,10 @@ class CameraActivity : AppCompatActivity() {
             try {
                 cameraProvider.unbindAll()
 
-                // ✨ 核心修改：绑定生命周期时，获取 camera 实例
                 camera = cameraProvider.bindToLifecycle(
                     this, cameraSelector, preview, imageCapture
                 )
 
-                // ✨ 启动手势监听（对焦 & 缩放）
                 setupCameraGestures()
 
             } catch (exc: Exception) {
@@ -114,32 +126,22 @@ class CameraActivity : AppCompatActivity() {
         }, ContextCompat.getMainExecutor(this))
     }
 
-    // ✨ 新增：配置手势监听
     @SuppressLint("ClickableViewAccessibility")
     private fun setupCameraGestures() {
-        // 1. 双指缩放监听器
         val scaleGestureDetector = ScaleGestureDetector(this, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
             override fun onScale(detector: ScaleGestureDetector): Boolean {
                 val currentZoomRatio = camera?.cameraInfo?.zoomState?.value?.zoomRatio ?: 1f
-                val delta = detector.scaleFactor // 缩放因子
-                // 计算新倍率
+                val delta = detector.scaleFactor
                 camera?.cameraControl?.setZoomRatio(currentZoomRatio * delta)
                 return true
             }
         })
 
-        // 2. 单击对焦监听器
         val gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
             override fun onSingleTapUp(e: MotionEvent): Boolean {
                 val factory = viewFinder.meteringPointFactory
                 val point = factory.createPoint(e.x, e.y)
 
-                // 创建对焦动作：对焦(AF) + 曝光(AE) + 白平衡(AWB)
-                // 3秒后如果没有锁定，自动取消对焦状态
-//                val action = FocusMeteringAction.Builder(point, FocusMeteringAction.FLAG_AF_AE_AWB)
-//                    .setAutoCancelDuration(3, TimeUnit.SECONDS)
-//                    .build()
-                // 修复点：使用位运算组合这三个标志，或者直接用 Builder(point) 默认也是全开
                 val action = FocusMeteringAction.Builder(point,
                     FocusMeteringAction.FLAG_AF or
                             FocusMeteringAction.FLAG_AE or
@@ -149,17 +151,14 @@ class CameraActivity : AppCompatActivity() {
                     .build()
                 camera?.cameraControl?.startFocusAndMetering(action)
 
-                // 可选：在这里加一个简单的 Log 或者 Toast 提示用户已对焦
-                // Log.d("Camera", "Focusing at ${e.x}, ${e.y}")
                 return true
             }
         })
 
-        // 3. 将触摸事件分发给上面两个监听器
         viewFinder.setOnTouchListener { _, event ->
             scaleGestureDetector.onTouchEvent(event)
             gestureDetector.onTouchEvent(event)
-            true // 消费事件
+            true
         }
     }
 

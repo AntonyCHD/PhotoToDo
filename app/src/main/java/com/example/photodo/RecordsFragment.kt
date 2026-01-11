@@ -9,6 +9,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
+// 需要导入 SessionManager
+import com.example.photodo.utils.SessionManager
 
 class RecordsFragment : Fragment() {
 
@@ -45,6 +47,11 @@ class RecordsFragment : Fragment() {
         loadAllTasks()
     }
 
+    override fun onStart() {
+        super.onStart()
+        if (::adapter.isInitialized) adapter.playEntranceOnce()
+    }
+
 //    private fun loadAllTasks() {
 //        // 使用 viewLifecycleOwner.lifecycleScope 避免内存泄漏
 //        viewLifecycleOwner.lifecycleScope.launch {
@@ -58,10 +65,15 @@ class RecordsFragment : Fragment() {
     private fun loadAllTasks() {
         viewLifecycleOwner.lifecycleScope.launch {
             context?.let { ctx ->
+                // 1. 获取当前用户 ID
+                val sessionManager = SessionManager(ctx)
+                val userId = sessionManager.getCurrentUserId()
+
                 val db = AppDatabase.getDatabase(ctx)
-                // ✅ 核心修改：使用 getAllTasksFlow() + collect
-                // 只要数据库有变化，这里会自动收到最新的 list
-                db.taskDao().getAllTasksFlow().collect { tasks ->
+
+                // 2. 传入 userId 进行过滤
+                // 修复点：getAllTasksFlow() -> getAllTasksFlow(userId)
+                db.taskDao().getAllTasksFlow(userId).collect { tasks ->
                     adapter.updateData(tasks)
                 }
             }
